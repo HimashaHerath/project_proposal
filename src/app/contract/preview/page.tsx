@@ -58,7 +58,7 @@ function ContractPreviewContent() {
     if (!data) return <div className="p-8">Loading contract...</div>;
 
     return (
-        <div className="min-h-screen bg-gray-100 p-8 print:p-0">
+        <div className="min-h-screen bg-muted p-8 print:p-0">
             {/* Toolbar - Hidden in Print */}
             <div className="max-w-[210mm] mx-auto mb-6 flex justify-between items-center print:hidden">
                 <Link href="/contract/new">

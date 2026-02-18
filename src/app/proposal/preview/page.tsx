@@ -78,7 +78,7 @@ function PreviewContent() {
     }
 
     return (
-        <div className="flex flex-col items-center gap-8 py-12 bg-gray-100 min-h-screen">
+        <div className="flex flex-col items-center gap-8 py-12 bg-muted min-h-screen">
             <div className="flex gap-4 print:hidden">
                 <Button variant="secondary" asChild>
                     <Link href={`/proposal/new?data=${btoa(JSON.stringify(data))}`}>

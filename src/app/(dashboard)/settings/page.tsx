@@ -23,6 +23,7 @@ const settingsSchema = z.object({
 
 export default function SettingsPage() {
     const [isLoading, setIsLoading] = useState(false);
+    const [saved, setSaved] = useState(false);
     const {
         register,
         handleSubmit,
@@ -44,11 +45,13 @@ export default function SettingsPage() {
 
     const onSubmit = (data: SettingsData) => {
         setIsLoading(true);
+        setSaved(false);
         // Simulate a small delay for better UX
         setTimeout(() => {
             settingsStore.save(data);
             setIsLoading(false);
-            alert("Settings saved!");
+            setSaved(true);
+            setTimeout(() => setSaved(false), 3000);
         }, 500);
     };
 
@@ -118,7 +121,10 @@ export default function SettingsPage() {
                     </CardContent>
                 </Card>
 
-                <div className="flex justify-end">
+                <div className="flex justify-end items-center gap-3">
+                    {saved && (
+                        <p className="text-sm text-muted-foreground">Settings saved successfully.</p>
+                    )}
                     <Button type="submit" disabled={isLoading}>
                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                         Save Changes

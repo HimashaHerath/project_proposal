@@ -63,6 +63,7 @@ export const ProposalForm = () => {
     });
 
     const [brandLine, setBrandLine] = useState("Proposals • Commercial-Proof");
+    const [draftSaved, setDraftSaved] = useState(false);
 
     useEffect(() => {
         if (proposalId) {
@@ -111,7 +112,7 @@ export const ProposalForm = () => {
         const settings = settingsStore.get();
         const finalData = {
             ...data,
-            brandName: settings.brandName || "InfraSurge",
+            brandName: settings.brandName || "Agency Name",
             brandDescription: settings.brandDescription || "Project Proposal"
         };
 
@@ -131,7 +132,8 @@ export const ProposalForm = () => {
             // Replace URL if new draft
             router.replace(`/proposal/new?id=${id}`);
         }
-        alert("Draft saved!");
+        setDraftSaved(true);
+        setTimeout(() => setDraftSaved(false), 3000);
     };
 
     return (
@@ -146,7 +148,8 @@ export const ProposalForm = () => {
                     <h1 className="text-3xl font-bold tracking-tight">{proposalId ? "Edit Proposal" : "New Proposal"}</h1>
                     <p className="text-muted-foreground mt-1">{brandLine}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
+                    {draftSaved && <p className="text-sm text-muted-foreground">Draft saved.</p>}
                     <Button variant="outline" type="button" onClick={() => window.history.back()}>Back</Button>
                     <Button variant="secondary" type="button" onClick={handleSubmit(onSaveDraft)}>Save Draft</Button>
                 </div>
@@ -208,7 +211,7 @@ export const ProposalForm = () => {
                         <div className="grid md:grid-cols-2 gap-8">
                             {/* Included */}
                             <div className="space-y-4">
-                                <Label className="text-green-600">Deliverables (Included)</Label>
+                                <Label>Deliverables (Included)</Label>
                                 {includedScopeFields.map((field, index) => (
                                     <div key={field.id} className="flex gap-2">
                                         <ShadcnInput
@@ -233,7 +236,7 @@ export const ProposalForm = () => {
 
                             {/* Excluded */}
                             <div className="space-y-4">
-                                <Label className="text-red-600">Out of Scope (Excluded)</Label>
+                                <Label className="text-muted-foreground">Out of Scope (Excluded)</Label>
                                 {excludedScopeFields.map((field, index) => (
                                     <div key={field.id} className="flex gap-2">
                                         <ShadcnInput
