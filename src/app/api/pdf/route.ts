@@ -1,64 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
-import { chromium } from "playwright";
+import { renderToBuffer } from "@react-pdf/renderer";
+import { proposalSchema } from "@/lib/schema";
+import { contractSchema } from "@/lib/contractSchema";
+import { ProposalDocument } from "@/lib/pdf/proposal-template";
+import { ContractDocument } from "@/lib/pdf/contract-template";
 
 export async function POST(req: NextRequest) {
-    try {
-        const data = await req.json();
-        const payload = btoa(JSON.stringify(data));
+  try {
+    const body = await req.json();
+    const isContract = body.type === "contract";
 
-        // Basic validation/logging if needed
-        console.log(`Generating PDF for project: ${data.projectName}`);
+    if (isContract) {
+      const { type, ...contractBody } = body;
+      const result = contractSchema.safeParse(contractBody);
 
-        // Determine base URL
-        // In production, this should be your deployed URL.
-        // For local dev, we assume localhost:3000
-        const protocol = req.headers.get("x-forwarded-proto") || "http";
-        const host = req.headers.get("host") || "localhost:3000";
-        const baseUrl = `${protocol}://${host}`;
-
-        const browser = await chromium.launch({
-            headless: true,
-        });
-        const context = await browser.newContext();
-        const page = await context.newPage();
-
-        // Navigate to the preview page with data
-        const previewUrl = `${baseUrl}/proposal/preview?data=${payload}`;
-        await page.goto(previewUrl, { waitUntil: "networkidle" });
-
-        // Generate PDF
-        // We print the whole scrollable area. 
-        // Since our PreviewPage renders multiple A4 divs, we want to print them as pages.
-        // CSS @page { size: A4 } and print styles should handle the breaks if set up correctly.
-        // However, Playwright's page.pdf() with format 'A4' usually works best if the content is continuous
-        // or if we rely on CSS break-after: always.
-
-        // Our A4Page component has specific dimensions.
-        // To get perfect print, we might need to tell Playwright to print background graphics.
-        const pdfBuffer = await page.pdf({
-            format: "A4",
-            printBackground: true,
-            margin: {
-                top: "0px",
-                bottom: "0px",
-                left: "0px",
-                right: "0px",
-            },
-        });
-
-        await browser.close();
-
-        return new NextResponse(pdfBuffer as any, {
-            headers: {
-                "Content-Type": "application/pdf",
-                "Content-Disposition": `attachment; filename="${data.projectName}_Proposal.pdf"`,
-            },
-        });
-    } catch (error) {
-        console.error("PDF Generation Error:", error);
+      if (!result.success) {
         return NextResponse.json(
-            { error: "Failed to generate PDF" },
-            { status: 500 }
+          { error: "Invalid contract data", details: result.error.flatten() },
+          { status: 400 }
         );
+      }
+
+      const data = result.data;
+      const buffer = await renderToBuffer(ContractDocument({ data }));
+
+      return new NextResponse(new Uint8Array(buffer), {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${data.clientName.replace(/[^a-zA-Z0-9-_]/g, "_")}_Contract.pdf"`,
+        },
+      });
+    } else {
+      const { type, ...proposalBody } = body;
+      const result = proposalSchema.safeParse(proposalBody);
+
+      if (!result.success) {
+        return NextResponse.json(
+          { error: "Invalid proposal data", details: result.error.flatten() },
+          { status: 400 }
+        );
+      }
+
+      const data = result.data;
+      const buffer = await renderToBuffer(ProposalDocument({ data }));
+
+      return new NextResponse(new Uint8Array(buffer), {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${data.projectName.replace(/[^a-zA-Z0-9-_]/g, "_")}_Proposal.pdf"`,
+        },
+      });
     }
+  } catch (error) {
+    console.error("PDF generation error:", error);
+    return NextResponse.json(
+      { error: "Failed to generate PDF" },
+      { status: 500 }
+    );
+  }
 }

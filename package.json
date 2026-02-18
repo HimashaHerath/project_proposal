@@ -1,7 +1,13 @@
 {
-  "name": "project_proposal",
-  "version": "0.1.0",
-  "private": true,
+  "name": "project-proposal",
+  "version": "1.0.0",
+  "description": "Open-source proposal and contract PDF generator for agencies and freelancers. Built by InfraSurge.",
+  "author": "Himasha Herath <himasha@infrasurge.dev>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HimashaHerath/project_proposal"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,13 +16,13 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@react-pdf/renderer": "^4.3.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.34.0",
     "lucide-react": "^0.564.0",
     "next": "16.1.6",
-    "playwright": "^1.58.2",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",

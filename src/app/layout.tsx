@@ -13,8 +13,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Proposal Generator",
-  description: "Modern proposal generator",
+  title: "Project Proposal | by InfraSurge",
+  description: "Open-source proposal and contract PDF generator for agencies and freelancers. Built by InfraSurge.",
 };
 
 export default function RootLayout({

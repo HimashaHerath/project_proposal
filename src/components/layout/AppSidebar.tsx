@@ -12,6 +12,7 @@ const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "New Proposal", href: "/proposal/new", icon: Plus },
     { name: "Drafts", href: "/proposal/drafts", icon: FileText },
+    { name: "New Contract", href: "/contract/new", icon: FileText },
     { name: "Settings", href: "/settings", icon: Settings },
 ];
 

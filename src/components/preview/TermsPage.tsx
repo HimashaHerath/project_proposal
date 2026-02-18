@@ -27,7 +27,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({
             <div>
                 {/* Header */}
                 <div className="flex justify-between items-baseline border-b-4 border-black pb-4 mb-16">
-                    <h2 className="text-4xl font-bold">T&C</h2>
+                    <h2 className="text-4xl font-bold">Engagement Terms</h2>
                     <span className="text-xl font-medium text-gray-500">03</span>
                 </div>
 
@@ -52,6 +52,24 @@ export const TermsPage: React.FC<TermsPageProps> = ({
                             * Note: Comprehensive legal terms regarding liability, warranties, and dispute resolution will be provided in the final contract.
                         </p>
                     </div>
+                </div>
+
+                {/* Signature Block */}
+                <div className="mt-20 border-t-2 border-dashed border-gray-300 pt-8">
+                    <h3 className="text-lg font-bold mb-8">Approval</h3>
+                    <div className="grid grid-cols-2 gap-12">
+                        <div>
+                            <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-12 border-b border-black pb-2">Client Signature</p>
+                            <p className="text-xs text-gray-400">Date: __________________</p>
+                        </div>
+                        <div>
+                            <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-12 border-b border-black pb-2">Provider Signature</p>
+                            <p className="text-xs text-gray-400">Date: {new Date().toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                    <p className="mt-8 text-sm text-gray-600">
+                        By signing above, you accept the scope, timeline, and pricing outlined in this proposal. A formal invoice and contract will follow.
+                    </p>
                 </div>
             </div>
 
