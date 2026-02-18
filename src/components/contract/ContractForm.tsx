@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { contractSchema, ContractData, defaultContractValues } from "@/lib/contractSchema";
 import { settingsStore } from "@/lib/settingsStore";
+import { contractStore } from "@/lib/contractStore";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -11,16 +12,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, ArrowRight } from "lucide-react";
+import { Loader2, ArrowRight, Save } from "lucide-react";
 import { motion } from "framer-motion";
 
 export const ContractForm = () => {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const contractId = searchParams.get("id");
     const [isLoading, setIsLoading] = useState(false);
+    const [draftSaved, setDraftSaved] = useState(false);
 
     const {
         register,
         handleSubmit,
+        reset,
         setValue,
         formState: { errors },
     } = useForm<ContractData>({
@@ -29,24 +34,45 @@ export const ContractForm = () => {
     });
 
     useEffect(() => {
-        // Load Settings for Provider Defaults
-        const settings = settingsStore.get();
-        if (settings.authorName) setValue("providerName", settings.authorName);
-        if (settings.brandName) setValue("brandName", settings.brandName);
-
-        // In a real app, we might also look up "providerAddress" if we stored it
-        setValue("providerAddress", "123 Creative Studio Blvd, Design City"); // Placeholder
-    }, [setValue]);
+        if (contractId) {
+            const stored = contractStore.getById(contractId);
+            if (stored) {
+                const { id, createdAt, updatedAt, status, ...data } = stored;
+                reset(data);
+            }
+        } else {
+            // Load Settings for Provider Defaults
+            const settings = settingsStore.get();
+            if (settings.authorName) setValue("providerName", settings.authorName);
+            if (settings.brandName) setValue("brandName", settings.brandName);
+            setValue("providerAddress", "123 Creative Studio Blvd, Design City");
+        }
+    }, [contractId, reset, setValue]);
 
     const onGenerate = (data: ContractData) => {
         setIsLoading(true);
-        // For now, we won't use a store for contracts (prototype scope), 
-        // we'll just pass data directly to preview via URL like the Proposal MVP.
-        // In production, this would go to a database/store.
 
-        const payload = btoa(JSON.stringify(data));
-        router.push(`/contract/preview?data=${payload}`);
+        const settings = settingsStore.get();
+        const finalData = {
+            ...data,
+            brandName: settings.brandName || "Agency Name",
+        };
+
+        const id = contractStore.save(finalData, contractId || undefined);
+        contractStore.markAsGenerated(id);
+
+        const payload = btoa(JSON.stringify(finalData));
+        router.push(`/contract/preview?data=${payload}&id=${id}`);
         setIsLoading(false);
+    };
+
+    const onSaveDraft = (data: ContractData) => {
+        const id = contractStore.save(data, contractId || undefined);
+        if (!contractId) {
+            router.replace(`/contract/new?id=${id}`);
+        }
+        setDraftSaved(true);
+        setTimeout(() => setDraftSaved(false), 3000);
     };
 
     return (
@@ -58,13 +84,20 @@ export const ContractForm = () => {
                 className="flex justify-between items-center border-b pb-6"
             >
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">New Contract</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">{contractId ? "Edit Contract" : "New Contract"}</h1>
                     <p className="text-muted-foreground mt-1">Master Services Agreement (MSA)</p>
                 </div>
-                <Button type="submit" disabled={isLoading} size="lg">
-                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
-                    Preview Contract
-                </Button>
+                <div className="flex items-center gap-2">
+                    {draftSaved && <p className="text-sm text-muted-foreground">Draft saved.</p>}
+                    <Button variant="outline" type="button" onClick={() => window.history.back()}>Back</Button>
+                    <Button variant="secondary" type="button" onClick={handleSubmit(onSaveDraft)}>
+                        <Save className="mr-2 h-4 w-4" /> Save Draft
+                    </Button>
+                    <Button type="submit" disabled={isLoading}>
+                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
+                        Preview Contract
+                    </Button>
+                </div>
             </motion.div>
 
             <div className="grid md:grid-cols-2 gap-8">

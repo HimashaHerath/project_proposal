@@ -9,6 +9,7 @@ import { ProjectBriefPage } from "@/components/preview/ProjectBriefPage";
 import { PricingPage } from "@/components/preview/PricingPage";
 import { TermsPage } from "@/components/preview/TermsPage";
 import { ProposalData } from "@/lib/schema";
+import { proposalStore } from "@/lib/store";
 import { Loader2, Download } from "lucide-react";
 
 function PreviewContent() {
@@ -19,12 +20,20 @@ function PreviewContent() {
 
     useEffect(() => {
         const dataParam = searchParams.get("data");
+        const idParam = searchParams.get("id");
+
         if (dataParam) {
             try {
                 const parsed = JSON.parse(atob(dataParam));
                 setData(parsed);
             } catch (e) {
                 console.error("Failed to parse proposal data", e);
+            }
+        } else if (idParam) {
+            const stored = proposalStore.getById(idParam);
+            if (stored) {
+                const { id, createdAt, updatedAt, status, ...proposalData } = stored;
+                setData(proposalData);
             }
         }
         setLoading(false);
@@ -52,7 +61,6 @@ function PreviewContent() {
             a.remove();
         } catch (error) {
             console.error(error);
-            alert("Error generating PDF");
         } finally {
             setGeneratingPdf(false);
         }

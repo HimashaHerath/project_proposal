@@ -5,14 +5,15 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Plus, LayoutDashboard, FileText, Settings, User } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Menu, Plus, LayoutDashboard, FileText, Settings, ScrollText } from "lucide-react";
+import { settingsStore } from "@/lib/settingsStore";
+import { useEffect, useState } from "react";
 
 const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "New Proposal", href: "/proposal/new", icon: Plus },
+    { name: "New Contract", href: "/contract/new", icon: ScrollText },
     { name: "Drafts", href: "/proposal/drafts", icon: FileText },
-    { name: "New Contract", href: "/contract/new", icon: FileText },
     { name: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -41,26 +42,15 @@ export function AppSidebar() {
     );
 }
 
-import { settingsStore } from "@/lib/settingsStore";
-import { useEffect, useState } from "react";
-
 function SidebarContent({ pathname }: { pathname: string }) {
     const [brand, setBrand] = useState({ name: "Agency Name", initials: "A" });
-    const [user, setUser] = useState({ name: "John Doe", email: "agency.com", initials: "JD" });
 
     useEffect(() => {
         const settings = settingsStore.get();
         if (settings.brandName) {
             setBrand({
                 name: settings.brandName,
-                initials: settings.brandName.charAt(0).toUpperCase()
-            });
-        }
-        if (settings.authorName) {
-            setUser({
-                name: settings.authorName,
-                email: settings.authorEmail,
-                initials: settings.authorName.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase()
+                initials: settings.brandName.charAt(0).toUpperCase(),
             });
         }
     }, []);
@@ -70,7 +60,9 @@ function SidebarContent({ pathname }: { pathname: string }) {
             {/* Logo */}
             <div className="px-6 pb-6 border-b">
                 <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight">
-                    <div className="w-8 h-8 rounded-lg bg-black text-white flex items-center justify-center">{brand.initials}</div>
+                    <div className="w-8 h-8 rounded-lg bg-foreground text-background flex items-center justify-center text-sm">
+                        {brand.initials}
+                    </div>
                     {brand.name.toLowerCase()}.
                 </Link>
             </div>
@@ -93,18 +85,6 @@ function SidebarContent({ pathname }: { pathname: string }) {
                     </Link>
                 ))}
             </nav>
-
-            {/* User */}
-            <div className="px-4 pt-6 border-t flex items-center gap-3">
-                <Avatar>
-                    <AvatarImage src="" />
-                    <AvatarFallback>{user.initials}</AvatarFallback>
-                </Avatar>
-                <div className="text-sm">
-                    <p className="font-medium truncate max-w-[140px]">{user.name}</p>
-                    <p className="text-xs text-muted-foreground truncate max-w-[140px]">{user.email}</p>
-                </div>
-            </div>
         </div>
     );
 }
