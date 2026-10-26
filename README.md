@@ -2,6 +2,10 @@
 
 Open-source proposal and contract PDF generator for agencies and freelancers. Built by [InfraSurge](https://github.com/HimashaHerath).
 
+Live: [project-proposal-silk.vercel.app](https://project-proposal-silk.vercel.app)
+
+![New proposal form](docs/screenshot.png)
+
 ## Features
 
 - **Proposal Generator** - Create professional project proposals with cover page, scope, pricing, timeline, and terms
